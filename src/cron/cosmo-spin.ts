@@ -10,7 +10,9 @@ export async function updateTransferableCosmoSpin() {
       id: objekts.id,
     })
     .from(objekts)
-    .where(and(eq(objekts.owner, SPIN_ADDRESS), eq(objekts.transferable, true)));
+    .where(
+      and(eq(objekts.owner, SPIN_ADDRESS), eq(objekts.transferable, true))
+    );
 
   // set transferable to false in batches
   const BATCH_SIZE = 150;
@@ -25,9 +27,13 @@ export async function updateTransferableCosmoSpin() {
         .where(
           inArray(
             objekts.id,
-            batch.map((a) => a.id),
-          ),
+            batch.map((a) => a.id)
+          )
         );
     }
   }
+
+  console.log(
+    `Update transferable status for ${spinObjekts.length} objekts. Reason: cosmo-spin`
+  );
 }

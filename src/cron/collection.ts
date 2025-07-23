@@ -25,6 +25,8 @@ export async function fixObjektSerial() {
         transferable: metadata.objekt.transferable,
       })
       .where(eq(objekts.id, objekt.id));
+
+    console.log(`Update missing serial for token ID ${objekt.id}`);
   }
 }
 
@@ -32,6 +34,7 @@ export async function fixCollection() {
   const collectionsResults = await indexer
     .select({
       id: collections.id,
+      slug: collections.slug,
     })
     .from(collections)
     .where(eq(collections.backImage, ""));
@@ -59,7 +62,9 @@ export async function fixCollection() {
         collectionNo: metadata.objekt.collectionNo,
         class: metadata.objekt.class,
         comoAmount: metadata.objekt.comoAmount,
-        onOffline: metadata.objekt.collectionNo.includes("Z") ? "online" : "offline",
+        onOffline: metadata.objekt.collectionNo.includes("Z")
+          ? "online"
+          : "offline",
         thumbnailImage: metadata.objekt.thumbnailImage,
         frontImage: metadata.objekt.frontImage,
         backImage: metadata.objekt.backImage,
@@ -67,6 +72,8 @@ export async function fixCollection() {
         textColor: metadata.objekt.textColor,
         accentColor: metadata.objekt.accentColor,
       })
-      .where(eq(collections.id, collection.id));
+      .where(eq(collections.slug, collection.slug));
+
+    console.log(`Update collection metadata for ${collection.slug}`);
   }
 }

@@ -26,12 +26,11 @@ export async function updateTransferableScoGrid() {
         gt(transfers.timestamp, lastTimestamp),
         eq(transfers.from, NULL_ADDRESS),
         eq(collections.class, "Special"),
-        eq(collections.onOffline, "online"),
-      ),
+        eq(collections.onOffline, "online")
+      )
     );
 
-  if (!scoObjekts.length)
-    return
+  if (!scoObjekts.length) return;
 
   // get all fco by owner that gridable / transferable = true
   // todo: maybe need to query into specific fco's collectionNo based on sco's collectionNo
@@ -45,15 +44,14 @@ export async function updateTransferableScoGrid() {
       and(
         inArray(
           objekts.owner,
-          scoObjekts.map((a) => a.to),
+          scoObjekts.map((a) => a.to)
         ),
         eq(collections.class, "First"),
-        eq(objekts.transferable, true),
-      ),
+        eq(objekts.transferable, true)
+      )
     );
 
-  if (!fcoObjekts.length)
-    return
+  if (!fcoObjekts.length) return;
 
   const BATCH_SIZE = 50;
   for (let i = 0; i < fcoObjekts.length; i += BATCH_SIZE) {
@@ -61,7 +59,7 @@ export async function updateTransferableScoGrid() {
 
     // check metadata
     const metadataBatch = await Promise.allSettled(
-      batch.map((e) => fetchMetadata(e.id.toString())),
+      batch.map((e) => fetchMetadata(e.id.toString()))
     );
 
     const objektIds: number[] = [];
@@ -87,7 +85,11 @@ export async function updateTransferableScoGrid() {
           transferable: false,
         })
         .where(inArray(objekts.id, objektIds));
-      console.log(`Updated ${objektIds.length} rows`);
+      for (const id of objektIds) {
+        console.log(
+          `Updated transferable status for token ID ${id}. Reason: grid`
+        );
+      }
     }
   }
 
