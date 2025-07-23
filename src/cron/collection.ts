@@ -17,6 +17,9 @@ export async function fixObjektSerial() {
     // get metadata
     const metadata = await fetchMetadata(objekt.id.toString());
 
+    // skip if same serial
+    if (metadata.objekt.objektNo === objekt.serial) continue;
+
     // update objekt
     await indexer
       .update(objekts)
