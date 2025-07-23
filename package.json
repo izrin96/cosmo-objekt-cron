@@ -1,0 +1,25 @@
+{
+  "name": "objekt-cron",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "start": "node dist/app.js",
+    "dev": "tsx src/app.ts"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@upstash/redis": "^1.35.1",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.3",
+    "node-cron": "^4.2.1",
+    "ofetch": "^1.4.1",
+    "pg": "^8.16.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/pg": "^8.15.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
