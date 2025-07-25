@@ -17,7 +17,7 @@ export async function updateTransferableScoGridAll() {
 
   const BATCH_SIZE = 50;
   for (let i = 0; i < fcoObjekts.length; i += BATCH_SIZE) {
-    console.log(`Batch checking from ${i} to ${i + BATCH_SIZE}`);
+    // console.log(`Batch checking from ${i} to ${i + BATCH_SIZE}`);
     const batch = fcoObjekts.slice(i, i + BATCH_SIZE);
 
     // check metadata
