@@ -52,6 +52,8 @@ export async function fixCollection() {
       .where(eq(objekts.collectionId, collection.id))
       .limit(1);
 
+    if (!objektsResults.length) continue;
+
     // get metadata
     const metadata = await fetchMetadata(objektsResults[0].tokenId.toString());
 
