@@ -5,7 +5,7 @@ import { fixCollection, fixObjektSerial } from "./cron/collection";
 // import { updateTransferableScoGrid } from "./cron/sco-grid";
 
 // At every minute
-cron.schedule("* * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
   await updateTransferableCosmoSpin();
 });
 
