@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { updateTransferableCosmoSpin } from "./cron/cosmo-spin";
-import { fixCollection, fixObjektMetadata } from "./cron/collection";
+import { fixObjektMetadata } from "./cron/collection";
 // import { updateTransferableScoGridAll } from "./cron/sco-grid-all";
 // import { updateTransferableScoGrid } from "./cron/sco-grid";
 
@@ -18,7 +18,6 @@ cron.schedule("*/10 * * * *", async () => {
 // At 00:00
 cron.schedule("0 0 * * *", async () => {
   await fixObjektMetadata();
-  await fixCollection();
 });
 
 // At 00:00 on Friday

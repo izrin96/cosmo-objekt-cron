@@ -68,7 +68,12 @@ export async function fixCollection() {
       slug: collections.slug,
     })
     .from(collections)
-    .where(eq(collections.backImage, ""));
+    .where(
+      and(
+        eq(collections.backImage, ""),
+        eq(collections.slug, "empty-collection")
+      )
+    );
 
   for (const collection of collectionsResults) {
     // get tokenId for the collection
