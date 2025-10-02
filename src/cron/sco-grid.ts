@@ -23,7 +23,7 @@ export async function updateTransferableScoGrid() {
     .leftJoin(collections, eq(transfers.collectionId, collections.id))
     .where(
       and(
-        gt(transfers.timestamp, lastTimestamp),
+        gt(transfers.timestamp, new Date(lastTimestamp)),
         eq(transfers.from, NULL_ADDRESS),
         eq(collections.class, "Special"),
         eq(collections.onOffline, "online")
@@ -46,7 +46,7 @@ export async function updateTransferableScoGrid() {
           objekts.owner,
           scoObjekts.map((a) => a.to)
         ),
-        eq(collections.class, "First"),
+        inArray(collections.class, ["First", "Basic"]),
         eq(objekts.transferable, true)
       )
     );
@@ -67,7 +67,7 @@ export async function updateTransferableScoGrid() {
     for (let j = 0; j < metadataBatch.length; j++) {
       const request = metadataBatch[j];
       const currentObjekt = batch[j];
-      if (request.status === "rejected") {
+      if (request.status === "rejected" || !request.value) {
         console.error(`Unable to fetch metadata for token ${currentObjekt.id}`);
         continue;
       }

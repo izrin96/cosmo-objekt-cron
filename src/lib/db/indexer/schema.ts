@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -14,9 +14,9 @@ import {
 export const collections = pgTable(
   "collection",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
     contract: varchar("contract", { length: 42 }).notNull(),
-    createdAt: timestamp("created_at", { mode: "string" }).notNull(),
+    createdAt: timestamp("created_at").notNull(),
     slug: varchar("slug", { length: 255 }).notNull(),
     collectionId: varchar("collection_id", { length: 255 }).notNull(),
     season: varchar("season", { length: 32 }).notNull(),
@@ -54,8 +54,8 @@ export const objekts = pgTable(
   {
     id: serial("id").primaryKey(),
     owner: varchar("owner", { length: 42 }).notNull(),
-    mintedAt: timestamp("minted_at", { mode: "string" }).notNull(),
-    receivedAt: timestamp("received_at", { mode: "string" }).notNull(),
+    mintedAt: timestamp("minted_at").notNull(),
+    receivedAt: timestamp("received_at").notNull(),
     serial: integer("serial").notNull(),
     transferable: boolean("transferable").notNull(),
     collectionId: varchar("collection_id", { length: 36 })
@@ -79,11 +79,11 @@ export const objektRelations = relations(objekts, ({ many, one }) => ({
 export const transfers = pgTable(
   "transfer",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
     hash: varchar("hash", { length: 255 }).notNull(),
     from: varchar("from", { length: 42 }).notNull(),
     to: varchar("to", { length: 42 }).notNull(),
-    timestamp: timestamp("timestamp", { mode: "string" }).notNull(),
+    timestamp: timestamp("timestamp").notNull(),
     tokenId: integer("token_id").notNull(),
     objektId: varchar("objekt_id", { length: 12 })
       .notNull()
@@ -114,7 +114,7 @@ export const transferRelations = relations(transfers, ({ one }) => ({
 export const comoBalances = pgTable(
   "como_balance",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
     contract: varchar("contract", { length: 42 }).notNull(),
     owner: varchar("owner", { length: 42 }).notNull(),
     amount: bigint("amount", { mode: "number" }).notNull(),
@@ -125,9 +125,9 @@ export const comoBalances = pgTable(
 export const votes = pgTable(
   "vote",
   {
-    id: uuid("id").primaryKey(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
     from: varchar("from", { length: 42 }).notNull(),
-    createdAt: timestamp("created_at", { mode: "string" }).notNull(),
+    createdAt: timestamp("created_at").notNull(),
     contract: varchar("contract", { length: 42 }).notNull(),
     pollId: integer("poll_id").notNull(),
     candidateId: integer("candidate_id"),

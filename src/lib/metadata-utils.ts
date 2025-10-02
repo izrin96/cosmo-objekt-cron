@@ -5,8 +5,7 @@ export async function fetchMetadata(tokenId: string) {
     return await fetchMetadataV1(tokenId);
   } catch (error) {
     console.log(`[fetchMetadata] Error fetching v1 metadata: ${error}`);
-    const v3 = await fetchMetadataV3(tokenId);
-    return normalizeV3(v3, tokenId);
+    return null;
   }
 }
 
@@ -43,8 +42,8 @@ export async function fetchMetadataV1(tokenId: string) {
   return await ofetch<MetadataV1>(
     `https://api.cosmo.fans/objekt/v1/token/${tokenId}`,
     {
-      retry: 3,
-      retryDelay: 500, // 500ms backoff
+      retry: 6,
+      retryDelay: 750, // 750ms backoff
     }
   );
 }

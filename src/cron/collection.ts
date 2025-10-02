@@ -1,24 +1,50 @@
 import { indexer } from "../lib/db/indexer";
 import { collections, objekts } from "../lib/db/indexer/schema";
-import { fetchMetadata } from "../lib/metadata-utils";
-import { eq } from "drizzle-orm";
+import { fetchMetadata, MetadataV1 } from "../lib/metadata-utils";
+import { and, eq } from "drizzle-orm";
 
-export async function fixObjektSerial() {
-  // get all objekts from new db
+export async function fixObjektMetadata() {
+  // find objekt that have missing metadata
   const objektsResults = await indexer
     .select({
       id: objekts.id,
-      serial: objekts.serial,
     })
     .from(objekts)
-    .where(eq(objekts.serial, 0));
+    .leftJoin(collections, eq(objekts.collectionId, collections.id))
+    .where(and(eq(collections.slug, "empty-collection")));
 
   for (const objekt of objektsResults) {
-    // get metadata
+    // fetch metadata
     const metadata = await fetchMetadata(objekt.id.toString());
 
-    // skip if same serial
-    if (metadata.objekt.objektNo === objekt.serial) continue;
+    if (metadata === null) continue;
+
+    const slug = metadata.objekt.collectionId
+      .toLowerCase()
+      // replace diacritics
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      // remove non-alphanumeric characters
+      .replace(/[^\w\s-]/g, "")
+      // replace spaces with hyphens
+      .replace(/\s+/g, "-");
+
+    // find correct collection
+    const collectionResult = await indexer
+      .select({
+        id: collections.id,
+      })
+      .from(collections)
+      .where(eq(collections.slug, slug));
+
+    let collection = collectionResult.at(0);
+
+    // if not found, skip, just wait indexer processor create it
+    // rarely happen
+    if (!collection) continue;
+
+    // optional
+    // await updateCollectionMetadata(slug, metadata);
 
     // update objekt
     await indexer
@@ -26,14 +52,16 @@ export async function fixObjektSerial() {
       .set({
         serial: metadata.objekt.objektNo,
         transferable: metadata.objekt.transferable,
+        collectionId: collection.id,
       })
       .where(eq(objekts.id, objekt.id));
 
-    console.log(`Update missing serial for token ID ${objekt.id}`);
+    console.log(`Update missing metadata for token ID ${objekt.id}`);
   }
 }
 
 export async function fixCollection() {
+  // find collection that have invalid metadata
   const collectionsResults = await indexer
     .select({
       id: collections.id,
@@ -43,8 +71,8 @@ export async function fixCollection() {
     .where(eq(collections.backImage, ""));
 
   for (const collection of collectionsResults) {
-    // find tokenId
-    const objektsResults = await indexer
+    // get tokenId for the collection
+    const objektResult = await indexer
       .select({
         tokenId: objekts.id,
       })
@@ -52,33 +80,44 @@ export async function fixCollection() {
       .where(eq(objekts.collectionId, collection.id))
       .limit(1);
 
-    if (!objektsResults.length) continue;
+    const objekt = objektResult.at(0);
 
-    // get metadata
-    const metadata = await fetchMetadata(objektsResults[0].tokenId.toString());
+    if (!objekt) continue;
 
-    // update collection
-    await indexer
-      .update(collections)
-      .set({
-        season: metadata.objekt.season,
-        member: metadata.objekt.member,
-        artist: metadata.objekt.artists[0].toLowerCase(),
-        collectionNo: metadata.objekt.collectionNo,
-        class: metadata.objekt.class,
-        comoAmount: metadata.objekt.comoAmount,
-        onOffline: metadata.objekt.collectionNo.includes("Z")
-          ? "online"
-          : "offline",
-        thumbnailImage: metadata.objekt.thumbnailImage,
-        frontImage: metadata.objekt.frontImage,
-        backImage: metadata.objekt.backImage,
-        backgroundColor: metadata.objekt.backgroundColor,
-        textColor: metadata.objekt.textColor,
-        accentColor: metadata.objekt.accentColor,
-      })
-      .where(eq(collections.slug, collection.slug));
+    // fetch metadata
+    const metadata = await fetchMetadata(objekt.tokenId.toString());
+
+    if (metadata === null) continue;
+
+    await updateCollectionMetadata(collection.slug, metadata);
 
     console.log(`Update collection metadata for ${collection.slug}`);
   }
+}
+
+export async function updateCollectionMetadata(
+  slug: string,
+  metadata: MetadataV1
+) {
+  // update collection metadata
+  await indexer
+    .update(collections)
+    .set({
+      season: metadata.objekt.season,
+      member: metadata.objekt.member,
+      artist: metadata.objekt.artists[0].toLowerCase(),
+      collectionNo: metadata.objekt.collectionNo,
+      class: metadata.objekt.class,
+      comoAmount: metadata.objekt.comoAmount,
+      onOffline: metadata.objekt.collectionNo.includes("Z")
+        ? "online"
+        : "offline",
+      thumbnailImage: metadata.objekt.thumbnailImage,
+      frontImage: metadata.objekt.frontImage,
+      backImage: metadata.objekt.backImage,
+      backgroundColor: metadata.objekt.backgroundColor,
+      textColor: metadata.objekt.textColor,
+      accentColor: metadata.objekt.accentColor,
+    })
+    .where(eq(collections.slug, slug));
 }

@@ -11,7 +11,12 @@ export async function updateTransferableScoGridAll() {
     })
     .from(objekts)
     .leftJoin(collections, eq(objekts.collectionId, collections.id))
-    .where(and(eq(collections.class, "First"), eq(objekts.transferable, true)));
+    .where(
+      and(
+        inArray(collections.class, ["First", "Basic"]),
+        eq(objekts.transferable, true)
+      )
+    );
 
   console.log(`Checking ${fcoObjekts.length} fco objekts`);
 
@@ -30,7 +35,7 @@ export async function updateTransferableScoGridAll() {
     for (let j = 0; j < metadataBatch.length; j++) {
       const request = metadataBatch[j];
       const currentObjekt = batch[j];
-      if (request.status === "rejected") {
+      if (request.status === "rejected" || !request.value) {
         console.error(`Unable to fetch metadata for token ${currentObjekt.id}`);
         continue;
       }
