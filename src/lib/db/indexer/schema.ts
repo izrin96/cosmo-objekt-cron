@@ -32,6 +32,7 @@ export const collections = pgTable(
     accentColor: varchar("accent_color", { length: 8 }).notNull(),
     comoAmount: integer("como_amount").notNull(),
     onOffline: varchar("on_offline", { length: 16 }).notNull().$type<"online" | "offline">(),
+    bandImageUrl: varchar("band_image_url", { length: 255 }),
   },
   (table) => [
     index("slug_idx").on(table.slug),
@@ -58,7 +59,7 @@ export const objekts = pgTable(
     receivedAt: timestamp("received_at").notNull(),
     serial: integer("serial").notNull(),
     transferable: boolean("transferable").notNull(),
-    collectionId: varchar("collection_id", { length: 36 })
+    collectionId: uuid("collection_id")
       .notNull()
       .references(() => collections.id),
   },
