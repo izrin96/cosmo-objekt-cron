@@ -60,46 +60,6 @@ export async function fixObjektMetadata() {
   }
 }
 
-export async function fixCollection() {
-  // find collection that have invalid metadata
-  const collectionsResults = await indexer
-    .select({
-      id: collections.id,
-      slug: collections.slug,
-    })
-    .from(collections)
-    .where(
-      and(
-        eq(collections.backImage, ""),
-        eq(collections.slug, "empty-collection")
-      )
-    );
-
-  for (const collection of collectionsResults) {
-    // get tokenId for the collection
-    const objektResult = await indexer
-      .select({
-        tokenId: objekts.id,
-      })
-      .from(objekts)
-      .where(eq(objekts.collectionId, collection.id))
-      .limit(1);
-
-    const objekt = objektResult.at(0);
-
-    if (!objekt) continue;
-
-    // fetch metadata
-    const metadata = await fetchMetadata(objekt.tokenId.toString());
-
-    if (metadata === null) continue;
-
-    await updateCollectionMetadata(collection.slug, metadata);
-
-    console.log(`Update collection metadata for ${collection.slug}`);
-  }
-}
-
 export async function updateCollectionMetadata(
   slug: string,
   metadata: MetadataV1
