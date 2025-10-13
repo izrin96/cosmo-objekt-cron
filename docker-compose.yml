@@ -6,3 +6,4 @@ services:
       - UPSTASH_REDIS_REST_URL
       - UPSTASH_REDIS_REST_TOKEN
       - DATABASE_URL_INDEXER
+    network_mode: host
